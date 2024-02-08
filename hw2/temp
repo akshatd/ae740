@@ -1,0 +1,6 @@
+
+% $$\nabla_x x^TQx = \begin{bmatrix} \frac{\partial}{\partial x_1}x^TQx \\ \frac{\partial}{\partial x_2}x^TQx \end{bmatrix} = \begin{bmatrix} 2Q_{11}x_1 + 2Q_{12}x_2 \\ 2Q_{21}x_1 + 2Q_{22}x_2 \end{bmatrix} = 2Qx$$
+%
+% $$\nabla_x_1 x^TQx = 2Q_{11}x_1 + 2Q_{12}x_2$$
+%
+% $$\nabla_x_2 x^TQx = 2Q_{21}x_1 + 2Q_{22}x_2$$
