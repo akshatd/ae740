@@ -117,7 +117,6 @@ function [A, B] = cdLin(x0, u0)
 		A(:, i) = (f1 - f2)/(2*epsilon);
 	end
 	
-	B = zeros(2, 1);
 	u = u0;
 	u = u + epsilon;
 	f1 = pendModel(x0, u);
