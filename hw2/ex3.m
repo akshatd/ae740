@@ -77,8 +77,9 @@ disp("3.d")
 [Kinf, P, e] = dlqr(A, B, Q, R, P);
 display("Kinf = " + mat2str(-Kinf));
 display("K20 = " + mat2str(K20));
+display("norm(Kinf - K20) = " + num2str(norm(-Kinf - K20)));
 %%
-% Yes, $K_{0, N}$ is close to $K_{\infty}$ and $K_{0, N} \rightarrow K_{\infty}$ as $N \rightarrow \infty$ which means it is stabilizing.
+% Yes, $K_{0, N}$ is close to $K_{\infty}$ (norm of just 0.00031167) and $K_{0, N} \rightarrow K_{\infty}$ as $N \rightarrow \infty$ which means it is stabilizing.
 
 %% 3.e Plot the components of K
 figure(3);
