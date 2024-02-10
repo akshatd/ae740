@@ -4,7 +4,7 @@ clc;
 clear;
 close all;
 
-%% 1. proof
+%% 1. Proof
 %%
 % $$J(x) = x^TQx + c^Tx$$
 %
@@ -24,7 +24,7 @@ close all;
 %
 % $$\nabla_x J(x) = 2Qx + c$$
 
-%% 1.a second term
+%% 1.a Second term
 %%
 % $$c^Tx = \sum_{i=1}^{n} c_i x_i$$
 %
@@ -36,7 +36,7 @@ close all;
 %
 % $$\nabla_x c^Tx = c$$
 
-%% 1.b first term
+%% 1.b First term
 %%
 % $$x^TQx = \sum_{i=1}^{n}\sum_{j=1}^{n} x_i Q_{ij} x_j$$
 %
@@ -84,7 +84,7 @@ close all;
 %
 % $$\nabla_x x^TQx = 2Qx$$
 
-%% 1.c hessian
+%% 1.c Hessian
 %%
 % $$\nabla_x J(x) = 2Qx + c$$
 %

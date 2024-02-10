@@ -79,7 +79,9 @@ display("Kinf = " + mat2str(-Kinf));
 display("K20 = " + mat2str(K20));
 display("norm(Kinf - K20) = " + num2str(norm(-Kinf - K20)));
 %%
-% Yes, $K_{0, N}$ is close to $K_{\infty}$ (norm of just 0.00031167) and $K_{0, N} \rightarrow K_{\infty}$ as $N \rightarrow \infty$ which means it is stabilizing.
+% Yes, $K_{0, N}$ is close to $K_{\infty}$ (norm of just 0.00031167) and $K_{0, N} \rightarrow K_{\infty}$ as $N \rightarrow \infty$
+% 
+% In addition, since (A, B) is stabilizing and (C, A) is detectable, the LQR gain is stabilizing.
 
 %% 3.e Plot the components of K
 figure(3);
@@ -140,8 +142,6 @@ function [S, M, Qbar, Rbar, K0N] = uncMPC(N, A, B, Q, R, P)
 		end
 		% Pad the first column and set it to other columns of S
 		for i = 2:N
-			% rowStart = (i - 1) * nx + 1;
-			% rowEnd = i * nx;
 			colStart = (i - 1) * nu + 1;
 			colEnd = i * nu;
 			zeroRows = (i - 1) * nx;
