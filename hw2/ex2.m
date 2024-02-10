@@ -2,6 +2,8 @@ clc;
 clear;
 close all;
 
+%% 2
+
 % setup matrices for part 2
 A = [
 	4/3 -2/3;

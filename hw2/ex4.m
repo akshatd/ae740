@@ -2,6 +2,8 @@ clc;
 clear;
 close all;
 
+%% 4
+
 % setup matrices from part 2
 A = [
 	4/3 -2/3;
@@ -19,41 +21,43 @@ P = 0;
 %% 4.b Compare using problem 2
 disp("4.b")
 [Kinf, Pinf, e] = dlqr(A, B, Q, R, P);
-disp("Using dlqr: Pinf= " + mat2str(Pinf));
+disp("Using dlqr: Pinf=");disp(Pinf);
 % for n=[2, 11, 20]
 % 	[S, M, Qbar, Rbar, K0N, P0N] = uncMPCric(n, A, B, Q, R, P);
 % 	disp("Using uncMPCric: N= " + num2str(n) + " P= " + mat2str(P0N) + " norm(Pinf-P0N)= " + num2str(norm(Pinf-P0N)));
 % end
 % cant do loops cos then matlab wont publish the disp
+disp("Using uncMPCric:");
 n=2;
 [S, M, Qbar, Rbar, K02, P0N] = uncMPCric(n, A, B, Q, R, P);
-disp("Using uncMPCric: N= " + num2str(n) + " P= " + mat2str(P0N) + " norm(Pinf-P0N)= " + num2str(norm(Pinf-P0N)));
+disp("N=" + num2str(n));disp("P=");disp(P0N);disp("norm(Pinf-P0N)=");disp(norm(Pinf-P0N));
 n=11;
 [S, M, Qbar, Rbar, K011, P0N] = uncMPCric(n, A, B, Q, R, P);
-disp("Using uncMPCric: N= " + num2str(n) + " P= " + mat2str(P0N) + " norm(Pinf-P0N)= " + num2str(norm(Pinf-P0N)));
+disp("N=" + num2str(n));disp("P=");disp(P0N);disp("norm(Pinf-P0N)=");disp(norm(Pinf-P0N));
 n=20;
 [S, M, Qbar, Rbar, K020, P0N] = uncMPCric(n, A, B, Q, R, P);
-disp("Using uncMPCric: N= " + num2str(n) + " P= " + mat2str(P0N) + " norm(Pinf-P0N)= " + num2str(norm(Pinf-P0N)));
+disp("N=" + num2str(n));disp("P=");disp(P0N);disp("norm(Pinf-P0N)=");disp(norm(Pinf-P0N));
 %%
 % The difference in the norm between P from dlqr and uncMPCric decreases as N increases and is 0.00020802 at N=20, which means that the two methods are converging.
 
 %% 4.c Compare using P = Pinf
 disp("4.c")
-disp("Using dlqr: Kinf= " + mat2str(Kinf) + " Pinf= " + mat2str(Pinf));
+disp("Using dlqr: Kinf=");disp(Kinf);disp("Pinf=");disp(Pinf);
 % for n=[2, 11, 20]
 % 	[S, M, Qbar, Rbar, K0N, P0N] = uncMPCric(n, A, B, Q, R, Pinf);
 % 	disp("Using uncMPCric: N= " + num2str(n) + " K0N= " + mat2str(K0N) + " norm(Kinf-K0N)= " + num2str(norm(-Kinf-K0N)) + " P= " + mat2str(P0N) + " norm(Pinf-P0N)= " + num2str(norm(Pinf-P0N)));
 % end
 % cant do loops cos then matlab wont publish the disp
+disp("Using uncMPCric:");
 n=2;
 [S, M, Qbar, Rbar, K0N, P0N] = uncMPCric(n, A, B, Q, R, Pinf);
-disp("Using uncMPCric: N= " + num2str(n) + " K0N= " + mat2str(K0N) + " norm(Kinf-K0N)= " + num2str(norm(-Kinf-K0N)) + " P= " + mat2str(P0N) + " norm(Pinf-P0N)= " + num2str(norm(Pinf-P0N)));
+disp("N=" + num2str(n));disp("K0N=");disp(K0N);disp("norm(Kinf-K0N)= ");disp(norm(-Kinf-K0N));disp("P=");disp(P0N);disp("norm(Pinf-P0N)=");disp(norm(Pinf-P0N));
 n=11;
 [S, M, Qbar, Rbar, K0N, P0N] = uncMPCric(n, A, B, Q, R, Pinf);
-disp("Using uncMPCric: N= " + num2str(n) + " K0N= " + mat2str(K0N) + " norm(Kinf-K0N)= " + num2str(norm(-Kinf-K0N)) + " P= " + mat2str(P0N) + " norm(Pinf-P0N)= " + num2str(norm(Pinf-P0N)));
+disp("N=" + num2str(n));disp("K0N=");disp(K0N);disp("norm(Kinf-K0N)= ");disp(norm(-Kinf-K0N));disp("P=");disp(P0N);disp("norm(Pinf-P0N)=");disp(norm(Pinf-P0N));
 n=20;
 [S, M, Qbar, Rbar, K0N, P0N] = uncMPCric(n, A, B, Q, R, Pinf);
-disp("Using uncMPCric: N= " + num2str(n) + " K0N= " + mat2str(K0N) + " norm(Kinf-K0N)= " + num2str(norm(-Kinf-K0N)) + " P= " + mat2str(P0N) + " norm(Pinf-P0N)= " + num2str(norm(Pinf-P0N)));
+disp("N=" + num2str(n));disp("K0N=");disp(K0N);disp("norm(Kinf-K0N)= ");disp(norm(-Kinf-K0N));disp("P=");disp(P0N);disp("norm(Pinf-P0N)=");disp(norm(Pinf-P0N));
 %%
 % The difference in the norm between K from dlqr and uncMPCric is extremely small regardless of N, in the order of 1e-15.
 %
