@@ -3,6 +3,7 @@
 clc;
 clear;
 close all;
+clear variables
 
 %% 2. Spacecraft attitude dynamics
 
@@ -31,11 +32,15 @@ Bc = double(subs(B, [x; u], [x0; u0]));
 Ts = 2;
 Cc = zeros(size(Ac, 1), size(Ac, 2));
 Dc = zeros(size(Cc, 1), size(Bc, 2));
-[Ad, Bd, Cd, Dd] = c2dm(Ac, Bc, Cc, Dc, Ts, 'zoh');
+scd = c2d(ss(Ac, Bc, Cc, Dc), Ts, 'zoh');
+Ad = scd.A;
 disp('Ad = ');
 disp(Ad);
+Bd = scd.B;
 disp('Bd = ');
 disp(Bd);
+Cd = scd.C;
+Dd = scd.D;
 
 %% 2.b Simulate using MPT Toolbox
 
@@ -49,29 +54,66 @@ R = diag([0.01, 0.01, 0.01]);
 % MPT stuff, do once
 % tbxmanager restorepath
 % mpt_init
-% setup model
-model = LTISystem('A', Ad, 'B', Bd, 'C', Cd, 'D', Dd, 'Ts', Ts);
-model.u.min = -0.1 * ones(nu, 1);
-model.u.max = 0.1 * ones(nu, 1);
-model.u.penalty = QuadFunction(R);
-model.x.penalty = QuadFunction(Q);
-model.x.with('terminalPenalty');
-model.x.terminalPenalty = QuadFunction(Pinf);
 
+% setup model
+modelMPT = LTISystem('A', Ad, 'B', Bd, 'C', Cd, 'D', Dd, 'Ts', Ts);
+modelMPT.u.min = -0.1 * ones(nu, 1);
+modelMPT.u.max = 0.1 * ones(nu, 1);
+modelMPT.u.penalty = QuadFunction(R);
+modelMPT.x.penalty = QuadFunction(Q);
+modelMPT.x.with('terminalPenalty');
+modelMPT.x.terminalPenalty = QuadFunction(Pinf);
+ctrl2 = MPCController(modelMPT, 2);
+ctrl20 = MPCController(modelMPT, 20);
+
+%% 2.c Simulate using Hybrid MPC Toolbox
+
+% Hybrid toolbox stuff
+addpath( ...
+  genpath('/home/akshatd/mine/umich/sem2/740/toolboxes/hybtbx-linux/'), ...
+'-end')
+
+% setup model
+clear cost constraints horizon2 horizon20;
+cost.Q = Q;
+cost.R = R;
+cost.P = Pinf;
+constraints.umin = -0.1 * ones(nu, 1);
+constraints.umax = 0.1 * ones(nu, 1);
+NHoriz = 2;
+horizon2.Nu = NHoriz;
+horizon2.N = NHoriz;
+horizon2.Ncu = NHoriz - 1;
+horizon2.Ncy = NHoriz - 1;
+ctrl2h = lincon(scd, 'reg', cost, horizon2, constraints, 'qpact', 0);
+
+NHoriz = 20;
+horizon20.Nu = NHoriz;
+horizon20.N = NHoriz;
+horizon20.Ncu = NHoriz - 1;
+horizon20.Ncy = NHoriz - 1;
+ctrl20h = lincon(scd, 'reg', cost, horizon20, constraints, 'qpact', 0);
+% do sim for both toolboxes
 Tsim = 200;
 times = 0:Ts:Tsim;
 h = Ts / 10;
 
-ctrl2 = MPCController(model, 2);
-ctrl20 = MPCController(model, 20);
 data.X2 = zeros(nx, Tsim / Ts);
 data.X20 = zeros(nx, Tsim / Ts);
+data.X2h = zeros(nx, Tsim / Ts);
+data.X20h = zeros(nx, Tsim / Ts);
 data.U2 = zeros(nu, Tsim / Ts);
 data.U20 = zeros(nu, Tsim / Ts);
+data.U2h = zeros(nu, Tsim / Ts);
+data.U20h = zeros(nu, Tsim / Ts);
 data.execTime2 = zeros(1, Tsim / Ts);
 data.execTime20 = zeros(1, Tsim / Ts);
+data.execTime2h = zeros(1, Tsim / Ts);
+data.execTime20h = zeros(1, Tsim / Ts);
 x2 = x0;
 x20 = x0;
+x2h = x0;
+x20h = x0;
 dataIdx = 1;
 
 for t = times
@@ -91,11 +133,29 @@ for t = times
   x20 = Xode20(end, :)';
   data.X20(:, dataIdx) = x20;
 
+  tic;
+  u2h = eval(ctrl2h, x2h);
+  data.execTime2h(dataIdx) = toc;
+  data.U2h(:, dataIdx) = u2h;
+  [~, Xode2h] = ode45(@ (t, x) scdynamics(t, x, u2h), [t + h:h:t + Ts], x2h);
+  x2h = Xode2h(end, :)';
+  data.X2h(:, dataIdx) = x2h;
+
+  tic;
+  u20h = eval(ctrl20h, x20h);
+  data.execTime20h(dataIdx) = toc;
+  data.U20h(:, dataIdx) = u20h;
+  [~, Xode20h] = ode45(@ (t, x) scdynamics(t, x, u20h), [t + h:h:t + Ts], x20h);
+  x20h = Xode20h(end, :)';
+  data.X20h(:, dataIdx) = x20h;
+
   dataIdx = dataIdx + 1;
 end
 
+%% plot MPT
+
 figure();
-sgtitle("MPT");
+sgtitle("MPT: x_1, x_2, x_3");
 
 for i = 1:3
   subplot(3, 1, i);
@@ -111,7 +171,7 @@ end
 snapnow;
 
 figure();
-sgtitle("MPT");
+sgtitle("MPT: x_4, x_5, x_6");
 
 for i = 4:6
   subplot(3, 1, i - 3);
@@ -127,7 +187,7 @@ end
 snapnow;
 
 figure();
-sgtitle("MPT");
+sgtitle("MPT: u_1, u_2, u_3");
 
 for i = 1:3
   subplot(3, 1, i);
@@ -144,7 +204,7 @@ end
 snapnow;
 
 figure();
-sgtitle('Time to compute control input');
+sgtitle('MPT: Computation Time');
 plot(times, data.execTime2, 'DisplayName', 'N=2');
 grid on;
 hold on;
@@ -154,7 +214,70 @@ ylabel('Time [s]');
 legend('Location', 'best');
 snapnow;
 
-%% 2.c Simulate using Hybrid MPC Toolbox
+%% plot Hbrid
+
+figure();
+sgtitle("Hybrid Toolbox: x_1, x_2, x_3");
+
+for i = 1:3
+  subplot(3, 1, i);
+  plot(times, data.X2h(i, :), 'DisplayName', 'N=2');
+  grid on;
+  hold on;
+  plot(times, data.X20h(i, :), 'DisplayName', 'N=20');
+  xlabel('t [s]');
+  ylabel("x_" + num2str(i));
+  legend('Location', 'best');
+end
+
+snapnow;
+
+figure();
+sgtitle("Hybrid Toolbox: x_4, x_5, x_6");
+
+for i = 4:6
+  subplot(3, 1, i - 3);
+  plot(times, data.X2h(i, :), 'DisplayName', 'N=2');
+  grid on;
+  hold on;
+  plot(times, data.X20h(i, :), 'DisplayName', 'N=20');
+  xlabel('t [s]');
+  ylabel("x_" + num2str(i));
+  legend('Location', 'best');
+end
+
+snapnow;
+
+figure();
+sgtitle("Hybrid Toolbox: u_1, u_2, u_3");
+
+for i = 1:3
+  subplot(3, 1, i);
+  plot(times, data.U2h(i, :), 'DisplayName', 'N=2');
+  grid on;
+  hold on;
+  plot(times, data.U20h(i, :), 'DisplayName', 'N=20');
+  xlabel('t [s]');
+  ylabel("u_" + num2str(i));
+  ylim([-0.12, 0.12]);
+  legend('Location', 'best');
+end
+
+snapnow;
+
+figure();
+sgtitle('Hybrid Toolbox: Computation Time');
+plot(times, data.execTime2h, 'DisplayName', 'N=2');
+grid on;
+hold on;
+plot(times, data.execTime20h, 'DisplayName', 'N=20');
+xlabel('t [s]');
+ylabel('Time [s]');
+legend('Location', 'best');
+snapnow;
+
+% some other Hybrid toolbox stuff?
+rmpath(genpath('/home/akshatd/mine/umich/sem2/740/toolboxes/hybtbx-linux/'))
 
 %% 2.a scdynamics function
 
