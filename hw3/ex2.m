@@ -39,15 +39,16 @@ disp(Bd);
 
 %% 2.b Simulate using MPT Toolbox
 
-% MPT stuff
-% tbxmanager restorepath
-% mpt_init
 % consts
 x0 = [-0.4; -0.8; 1.2; -0.02; -0.02; 0.02];
 Q = diag([1, 1, 1, 0.01, 0.01, 0.01]);
 R = diag([0.01, 0.01, 0.01]);
 % get P with DARE
 [Kinf, Pinf, CLeig] = dlqr(Ad, Bd, Q, R);
+
+% MPT stuff, do once
+% tbxmanager restorepath
+% mpt_init
 % setup model
 model = LTISystem('A', Ad, 'B', Bd, 'C', Cd, 'D', Dd, 'Ts', Ts);
 model.u.min = -0.1 * ones(nu, 1);
@@ -97,37 +98,50 @@ figure();
 sgtitle("MPT");
 
 for i = 1:3
-  subplot(3, 3, i)
+  subplot(3, 1, i);
   plot(times, data.X2(i, :), 'DisplayName', 'N=2');
   grid on;
   hold on;
   plot(times, data.X20(i, :), 'DisplayName', 'N=20');
   xlabel('t [s]');
   ylabel("x_" + num2str(i));
-  legend show
+  legend('Location', 'best');
 end
 
+snapnow;
+
+figure();
+sgtitle("MPT");
+
 for i = 4:6
-  subplot(3, 3, i)
+  subplot(3, 1, i - 3);
   plot(times, data.X2(i, :), 'DisplayName', 'N=2');
   grid on;
   hold on;
   plot(times, data.X20(i, :), 'DisplayName', 'N=20');
   xlabel('t [s]');
-  ylabel("w_" + num2str(i));
-  legend show
+  ylabel("x_" + num2str(i));
+  legend('Location', 'best');
 end
 
+snapnow;
+
+figure();
+sgtitle("MPT");
+
 for i = 1:3
-  subplot(3, 3, 6 + i)
+  subplot(3, 1, i);
   plot(times, data.U2(i, :), 'DisplayName', 'N=2');
   grid on;
   hold on;
   plot(times, data.U20(i, :), 'DisplayName', 'N=20');
   xlabel('t [s]');
   ylabel("u_" + num2str(i));
-  legend show
+  ylim([-0.12, 0.12]);
+  legend('Location', 'best');
 end
+
+snapnow;
 
 figure();
 sgtitle('Time to compute control input');
@@ -137,7 +151,12 @@ hold on;
 plot(times, data.execTime20, 'DisplayName', 'N=20');
 xlabel('t [s]');
 ylabel('Time [s]');
-legend show
+legend('Location', 'best');
+snapnow;
+
+%% 2.c Simulate using Hybrid MPC Toolbox
+
+%% 2.a scdynamics function
 
 function [xdot] = scdynamics(t, x, u)
   J1 = 120;
