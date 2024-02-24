@@ -80,7 +80,7 @@ N = 10; % Horizon
 modelMPT = LTISystem('A', Ax, 'B', Bx, 'C', Cx, 'D', Dx, 'Ts', Ts);
 modelMPT.x.min = [-3, -1, -0.15, -inf];
 modelMPT.x.max = -modelMPT.x.min;
-modelMPT.u.min = -0.15;
+modelMPT.u.min = -0.06;
 modelMPT.u.max = -modelMPT.u.min;
 modelMPT.y.min = [-0.1, -0.07];
 modelMPT.y.max = -modelMPT.y.min;
@@ -109,7 +109,7 @@ cost.P = P;
 cost.rho = Inf;
 % constraints.xmin = [-3, -1, -0.15, -inf];
 % constraints.xmax = -constraints.xmin;
-constraints.umin = -0.15;
+constraints.umin = -0.06;
 constraints.umax = -constraints.umin;
 % add the constraints for x here
 constraints.ymin = [-0.1, -0.07, -3, -1, -0.15, -inf];
@@ -208,12 +208,14 @@ plot(times, data.Y(1, :));
 grid on;
 xlabel('t [s]');
 ylabel("Front slip angle");
+ylim([-0.12, 0.12]);
 
 subplot(2, 1, 2);
 plot(times, data.Y(2, :));
 grid on;
 xlabel('t [s]');
 ylabel("Rear slip angle");
+ylim([-0.07, 0.07]);
 
 snapnow;
 
@@ -254,11 +256,13 @@ plot(times, data.Yh(1, :));
 grid on;
 xlabel('t [s]');
 ylabel("Front slip angle");
+ylim([-0.12, 0.12]);
 
 subplot(2, 1, 2);
 plot(times, data.Yh(2, :));
 grid on;
 xlabel('t [s]');
 ylabel("Rear slip angle");
+ylim([-0.07, 0.07]);
 
 snapnow;
