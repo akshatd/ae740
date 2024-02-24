@@ -96,28 +96,28 @@ end
 
 % plot
 figure;
-plot(0:100, data.X(1, :), "DisplayName", "x");
+plot(0:100, data.X(1, :), '--r', "DisplayName", "x");
 grid on;
 hold on;
-plot(0:100, data.X(2, :), "DisplayName", "y");
-plot(0:100, data.X(3, :), "DisplayName", "z");
-plot(0:100, data.X_hat(1, :), "DisplayName", "$\hat{x}$");
-plot(0:100, data.X_hat(2, :), "DisplayName", "$\hat{y}$");
-plot(0:100, data.X_hat(3, :), "DisplayName", "$\hat{z}$");
+plot(0:100, data.X(2, :), '--g', "DisplayName", "y");
+plot(0:100, data.X(3, :), '--b', "DisplayName", "z");
+plot(0:100, data.X_hat(1, :), 'r', "DisplayName", "$\hat{x}$");
+plot(0:100, data.X_hat(2, :), 'g', "DisplayName", "$\hat{y}$");
+plot(0:100, data.X_hat(3, :), 'b', "DisplayName", "$\hat{z}$");
 xlabel('k');
 ylabel('Relative Position [km]');
-legend("Location", "best", "Interpreter", "latex", "FontSize", 14);
+legend("Location", "best", "Interpreter", "latex");
 title('Position states');
 
 figure;
-plot(0:100, data.X(4, :), "DisplayName", "$\dot{x}$");
+plot(0:100, data.X(4, :), '--r', "DisplayName", "$\dot{x}$");
 grid on;
 hold on;
-plot(0:100, data.X(5, :), "DisplayName", "$\dot{y}$");
-plot(0:100, data.X(6, :), "DisplayName", "$\dot{z}$");
-plot(0:100, data.X_hat(4, :), "DisplayName", "$\hat{\dot{x}}$");
-plot(0:100, data.X_hat(5, :), "DisplayName", "$\hat{\dot{y}}$");
-plot(0:100, data.X_hat(6, :), "DisplayName", "$\hat{\dot{z}}$");
+plot(0:100, data.X(5, :), '--g', "DisplayName", "$\dot{y}$");
+plot(0:100, data.X(6, :), '--b', "DisplayName", "$\dot{z}$");
+plot(0:100, data.X_hat(4, :), 'r', "DisplayName", "$\hat{\dot{x}}$");
+plot(0:100, data.X_hat(5, :), 'g', "DisplayName", "$\hat{\dot{y}}$");
+plot(0:100, data.X_hat(6, :), 'b', "DisplayName", "$\hat{\dot{z}}$");
 xlabel('k');
 ylabel('Relative Velocity [km]');
 legend("Location", "best", "Interpreter", "latex", "FontSize", 14);
