@@ -6,7 +6,7 @@ clear variables
 %% 3 Control of a car
 
 %% 3.a Discrete time model
-
+disp('3.a Discrete time model');
 % consts
 m = 1891;
 vx = 20;
@@ -48,9 +48,9 @@ else
 end
 
 if rank(ctrb(Ad, Bd)) == size(Ad, 1)
-  disp('(Ad, Bd) is controllable');
+  disp('(Ad, Bd) has full rank, it is controllable');
 else
-  disp('(Ad, Bd) is not controllable');
+  disp('(Ad, Bd) does not have full rank, it is not controllable');
 end
 
 %% 3.b simulate using MPT
