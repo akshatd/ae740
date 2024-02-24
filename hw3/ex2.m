@@ -72,9 +72,9 @@ ctrl20 = MPCController(modelMPT, 20);
 addpath( ...
   genpath('/home/akshatd/mine/umich/sem2/740/toolboxes/hybtbx-linux/'), ...
 '-end')
+clear cost constraints horizon2 horizon20;
 
 % setup model
-clear cost constraints horizon2 horizon20;
 cost.Q = Q;
 cost.R = R;
 cost.P = Pinf;
@@ -151,6 +151,9 @@ for t = times
 
   dataIdx = dataIdx + 1;
 end
+
+% some other Hybrid toolbox stuff?
+rmpath(genpath('/home/akshatd/mine/umich/sem2/740/toolboxes/hybtbx-linux/'))
 
 %% plot MPT
 
@@ -275,9 +278,6 @@ xlabel('t [s]');
 ylabel('Time [s]');
 legend('Location', 'best');
 snapnow;
-
-% some other Hybrid toolbox stuff?
-rmpath(genpath('/home/akshatd/mine/umich/sem2/740/toolboxes/hybtbx-linux/'))
 
 %% 2.a scdynamics function
 
