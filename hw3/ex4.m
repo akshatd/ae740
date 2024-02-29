@@ -2,6 +2,7 @@ clc;
 clear;
 close all;
 clear variables
+format shortG;
 
 %% 4 Spacecraft Motion
 
@@ -61,6 +62,13 @@ disp(Cd);
 
 %% 4.d Moving Horizon Observer
 disp('4.d Moving Horizon Observer');
+%%
+% We can see that the moving horizon observer manages to track the position
+% of the spacecraft quite well. The velocity states are also tracked well,
+% but the estimate is a little noisy. There is also a small error in the
+% beginning, because we had to use the initial states specified in the problem
+% instead of using the a-priori state estimate as shown in the notes.
+
 P = diag([1, 1, 1, 0.001, 0.001, 0.001]);
 R = diag([0.01, 0.01, 0.01]);
 Q = diag([0.001, 0.001, 0.001, 0.1, 0.1, 0.1]);
@@ -122,5 +130,3 @@ xlabel('k');
 ylabel('Relative Velocity [km]');
 legend("Location", "best", "Interpreter", "latex", "FontSize", 14);
 title('Velocity states');
-
-% "$\hat{\dot{x}}$"

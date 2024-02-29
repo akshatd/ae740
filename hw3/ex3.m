@@ -2,6 +2,7 @@ clc;
 clear;
 close all;
 clear variables
+format shortG;
 
 %% 3 Control of a car
 
@@ -54,7 +55,7 @@ else
 end
 
 %% 3.b simulate using MPT
-
+disp('3.b simulate using MPT');
 Ax = [Ad, Bd, 0 * Ad(:, 1);
       0 * Ad(1, :), 1, 0;
       0 * Ad(1, :), 0, 1;
@@ -75,8 +76,9 @@ P = zeros(size(Ax, 1));
 N = 10; % Horizon
 
 % MPT stuff, do once
-% tbxmanager restorepath
-% mpt_init
+tbxmanager restorepath
+mpt_init
+% create the model
 modelMPT = LTISystem('A', Ax, 'B', Bx, 'C', Cx, 'D', Dx, 'Ts', Ts);
 modelMPT.x.min = [-3, -1, -0.15, -inf];
 modelMPT.x.max = -modelMPT.x.min;
@@ -91,6 +93,11 @@ modelMPT.x.terminalPenalty = QuadFunction(P);
 ctrl = MPCController(modelMPT, N);
 
 %% 3.c Simulate using Hybrid toolbox
+disp('3.c Simulate using Hybrid toolbox');
+%%
+% Both the toolboxes give the same results, so we can use either one for
+% simulation, and it assures us that the simulation is correct.
+% We also see that the constraints are satisfied.
 
 % Hybrid toolbox stuff
 addpath( ...

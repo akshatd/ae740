@@ -4,6 +4,7 @@ clc;
 clear;
 close all;
 clear variables
+format shortG;
 
 %% 2. Spacecraft attitude dynamics
 
@@ -43,7 +44,7 @@ Cd = scd.C;
 Dd = scd.D;
 
 %% 2.b Simulate using MPT Toolbox
-
+disp("2.b Simulate using MPT Toolbox");
 % consts
 x0 = [-0.4; -0.8; 1.2; -0.02; -0.02; 0.02];
 Q = diag([1, 1, 1, 0.01, 0.01, 0.01]);
@@ -52,8 +53,8 @@ R = diag([0.01, 0.01, 0.01]);
 [Kinf, Pinf, CLeig] = dlqr(Ad, Bd, Q, R);
 
 % MPT stuff, do once
-% tbxmanager restorepath
-% mpt_init
+tbxmanager restorepath
+mpt_init
 
 % setup model
 modelMPT = LTISystem('A', Ad, 'B', Bd, 'C', Cd, 'D', Dd, 'Ts', Ts);
@@ -67,6 +68,10 @@ ctrl2 = MPCController(modelMPT, 2);
 ctrl20 = MPCController(modelMPT, 20);
 
 %% 2.c Simulate using Hybrid MPC Toolbox
+disp("2.c Simulate using Hybrid MPC Toolbox");
+%%
+% Both the toolboxes give the same results, so we can use either one for
+% simulation, and it assures us that the simulation is correct.
 
 % Hybrid toolbox stuff
 addpath( ...
@@ -155,7 +160,7 @@ end
 % some other Hybrid toolbox stuff?
 rmpath(genpath('/home/akshatd/mine/umich/sem2/740/toolboxes/hybtbx-linux/'))
 
-%% plot MPT
+% plot MPT
 
 figure();
 sgtitle("MPT: x_1, x_2, x_3");
@@ -217,7 +222,7 @@ ylabel('Time [s]');
 legend('Location', 'best');
 snapnow;
 
-%% plot Hbrid
+% plot Hybrid
 
 figure();
 sgtitle("Hybrid Toolbox: x_1, x_2, x_3");
