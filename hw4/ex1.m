@@ -1,3 +1,5 @@
+%% AE740 HW4 akshatdy
+
 clc;
 clear;
 close all;
@@ -51,6 +53,22 @@ disp('Solution =');
 disp(x_my);
 disp('Lagrange multipliers =');
 disp(lam_my);
+
+%%
+% The solution from myQP is the same as MATLAB's quadprog, and the Lagrange
+% multipliers are also the same.
+%
+% Solutions:
+%
+% - myQP: [0.5 1]
+%
+% - MATLAB quadprog: [0.5 1]
+%
+% Lagrange multipliers:
+%
+% - myQP: [3 0 0]
+%
+% - MATLAB quadprog: [3 6.8148e-10 3.6335e-12]
 
 %% 1.c Discretize the mass-spring-damper system
 disp('1.c Discrete time model of the mass-spring system')
@@ -129,7 +147,7 @@ ulim.max = [lN];
 ulim.min = -ulim.max;
 
 %% 1.h/i Simulate MPC closed loop
-% disp('1.h Simulate MPC closed loop')
+
 % m = 1;
 % k = 1;
 N = 15;
@@ -242,17 +260,16 @@ yline(-0.2, '--r', 'DisplayName', 'u min', "LineWidth", 1);
 ylim([-0.30, 0.30]);
 legend();
 
+disp('1.h Simulate MPC closed loop');
+fprintf('x_1 limits = [%f  %f]\n', min(data.x_msd(1, :)), max(data.x_msd(1, :)));
+fprintf('u limits = [%f  %f]\n', min(data.u), max(data.u));
+
+%%
+% x_1 limits = [-0.201262 0.194408]
+% u limits = [-0.213918 0.209788]
+% There is a very slight constraint violation for both the state and the control input
+
 %% 1.i Simulate MPC closed loop and comment on differernces
-% After reducing the mass an increasing the stiffness, we can see that the
-% controller is not only robust to these changes, but it also performs
-% better. We can notice that from the initial state, the controller now is able
-% to reach the reference faster at 2.2s vs 2.6s. Additionally, we can observe
-% that the oscillations in the state and input are reduced. However, these differences
-% are mostly due to the fact that the mass is reduced and the stiffness is increased,
-% making the dynamics of the mass spring system faster. The controller is
-% also given more control authority so it can reach the reference by pushing
-% the control input harder. Overall, the controller is still robust while facing
-% a model mismatch by being able to push the control input more.
 
 figure();
 sgtitle('1.i Simulate MPC closed loop with different mass and stiffness');
@@ -285,6 +302,28 @@ yline(0.25, '--r', 'DisplayName', 'u max', "LineWidth", 1);
 yline(-0.25, '--r', 'DisplayName', 'u min', "LineWidth", 1);
 ylim([-0.30, 0.30]);
 legend();
+
+%%
+% After reducing the mass an increasing the stiffness, we can see that the
+% controller is not only robust to these changes, but it also performs
+% better. We can notice that from the initial state, the controller now is able
+% to reach the reference faster at 2.2s vs 2.6s. Additionally, we can observe
+% that the oscillations in the state and input are reduced. However, these differences
+% are mostly due to the fact that the mass is reduced and the stiffness is increased,
+% making the dynamics of the mass spring system faster. The controller is
+% also given more control authority so it can reach the reference by pushing
+% the control input harder. Overall, the controller is still robust while facing
+% a model mismatch by being able to push the control input more.
+
+disp('1.i Simulate MPC closed loop with different mass and stiffness');
+fprintf('x_1 limits = [%f  %f]\n', min(data.x_msd20(1, :)), max(data.x_msd20(1, :)));
+fprintf('u limits = [%f  %f]\n', min(data.u20), max(data.u20));
+
+%%
+% x_1 limits = [-0.199101 0.194064]
+% u limits = [-0.259843 0.255778]
+% There is a very slight constraint violation for the control input, but the state
+% is well within the limits
 
 %% 1.a Standard dual projected gradient Function
 function [U, lam] = myQP(H, q, A, b, lam0)
