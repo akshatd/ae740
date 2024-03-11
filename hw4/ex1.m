@@ -122,11 +122,169 @@ lN = 10;
 % large number
 xlim.max = [lN, lN, lN, 0.2, 0.2]; % [dx1, dx2, e, u, x_1]
 xlim.min = -xlim.max;
+xlim20.max = [lN, lN, lN, 0.25, 0.2]; % [dx1, dx2, e, u, x_1]
+xlim20.min = -xlim20.max;
 % Note our "control" is "control increment", actual control is the fourth state
 ulim.max = [lN];
 ulim.min = -ulim.max;
 
-%% 1.h Simulate MPC closed loop
+%% 1.h/i Simulate MPC closed loop
+% disp('1.h Simulate MPC closed loop')
+% m = 1;
+% k = 1;
+N = 15;
+cmds = [-0.19 0.19 -0.25];
+cmd = cmds(1);
+prev_cmd = cmd;
+% start with everything as 0, so the error is now the step reference command
+xk_msd = [0; 0];
+xk_msd20 = [0; 0];
+xk = [0; 0; -cmd; 0; 0];
+xk20 = [0; 0; -cmd; 0; 0];
+Tcmd = 12;
+Tsim = Tcmd * length(cmds);
+times = 0:Ts:Tsim;
+fidelity = Ts / 10;
+% form the matrices needed for QP
+[H, L, G, W, T, IMPC] = formQPMatrices(A, B, Q, R, P, xlim, ulim, N);
+[H20, L20, G20, W20, T20, IMPC20] = formQPMatrices(A, B, Q, R, P, xlim20, ulim, N);
+lam = ones(size(G, 1), 1);
+lam20 = ones(size(G20, 1), 1);
+
+data.x_msd = zeros(2, Tsim / Ts);
+data.x_msd20 = zeros(2, Tsim / Ts);
+data.u = zeros(1, Tsim / Ts);
+data.u20 = zeros(1, Tsim / Ts);
+data.r = zeros(1, Tsim / Ts);
+data_idx = 1;
+
+for t = times
+  % get the current command
+  cmd = cmds(min(1 + floor(t / Tcmd), length(cmds)));
+
+  if cmd ~= prev_cmd
+    % update the error in the state
+    xk(3) = xk(3) - cmd + prev_cmd;
+    xk20(3) = xk20(3) - cmd + prev_cmd;
+  end
+
+  % solve the QP
+  [U, lam] = myQP(H, L * xk, G, W + T * xk, lam);
+  [U20, lam20] = myQP(H20, L20 * xk20, G20, W20 + T20 * xk20, lam20);
+  % get the first control increment
+  delta_uk = IMPC * U;
+  delta_uk20 = IMPC20 * U20;
+  uk = xk(4) + delta_uk; % nu is just 1 so this works
+  uk20 = xk20(4) + delta_uk20; % nu is just 1 so this works
+  % simulate the system
+  [~, xk1_msd_ode] = ode45(@(t, x) msd(t, x, uk, 1, 1), [t + fidelity:fidelity:t + Ts], xk_msd);
+  [~, xk1_msd_ode20] = ode45(@(t, x) msd(t, x, uk20, 0.8, 1.2), [t + fidelity:fidelity:t + Ts], xk_msd20);
+  xk1_msd = xk1_msd_ode(end, :)';
+  xk1_msd20 = xk1_msd_ode20(end, :)';
+  % update the state
+  delta_xk_msd = xk1_msd - xk_msd;
+  xk1 = [delta_xk_msd; % delta x1 and x2
+         xk(3) + delta_xk_msd(1); % e
+         uk; % u
+         xk1_msd(1)]; % x1
+
+  delta_xk_msd20 = xk1_msd20 - xk_msd20;
+  xk120 = [delta_xk_msd20; % delta x1 and x2
+           xk20(3) + delta_xk_msd20(1); % e
+           uk20; % u
+           xk1_msd20(1)]; % x1
+  % update
+  xk_msd = xk1_msd;
+  xk_msd20 = xk1_msd20;
+  xk = xk1;
+  xk20 = xk120;
+  prev_cmd = cmd;
+  % save data
+  data.x_msd(:, data_idx) = xk_msd;
+  data.x_msd20(:, data_idx) = xk_msd20;
+  data.u(data_idx) = uk;
+  data.u20(data_idx) = uk20;
+  data.r(data_idx) = cmd;
+
+  data_idx = data_idx + 1;
+end
+
+% plot the results
+figure();
+sgtitle('1.h Simulate MPC closed loop');
+subplot(3, 1, 1);
+plot(times, data.x_msd(1, :), 'DisplayName', 'x_1');
+grid on;
+hold on;
+plot(times, data.r, '--k', 'DisplayName', 'reference', "LineWidth", 1);
+yline(0.2, '--r', 'DisplayName', 'x_1 max', "LineWidth", 1);
+yline(-0.2, '--r', 'DisplayName', 'x_1 min', "LineWidth", 1);
+xlabel('t [s]');
+ylabel('x_1');
+ylim([-0.25, 0.25]);
+legend();
+
+subplot(3, 1, 2);
+plot(times, data.x_msd(2, :), 'DisplayName', 'x_2');
+grid on;
+xlabel('t [s]');
+ylabel('x_2');
+ylim([-0.40, 0.40]);
+legend();
+
+subplot(3, 1, 3);
+stairs(times, data.u, 'DisplayName', 'u');
+grid on;
+xlabel('t [s]');
+ylabel('u');
+yline(0.2, '--r', 'DisplayName', 'u max', "LineWidth", 1);
+yline(-0.2, '--r', 'DisplayName', 'u min', "LineWidth", 1);
+ylim([-0.30, 0.30]);
+legend();
+
+%% 1.i Simulate MPC closed loop and comment on differernces
+% After reducing the mass an increasing the stiffness, we can see that the
+% controller is not only robust to these changes, but it also performs
+% better. We can notice that from the initial state, the controller now is able
+% to reach the reference faster at 2.2s vs 2.6s. Additionally, we can observe
+% that the oscillations in the state and input are reduced. However, these differences
+% are mostly due to the fact that the mass is reduced and the stiffness is increased,
+% making the dynamics of the mass spring system faster. The controller is
+% also given more control authority so it can reach the reference by pushing
+% the control input harder. Overall, the controller is still robust while facing
+% a model mismatch by being able to push the control input more.
+
+figure();
+sgtitle('1.i Simulate MPC closed loop with different mass and stiffness');
+subplot(3, 1, 1);
+plot(times, data.x_msd20(1, :), 'DisplayName', 'x_1');
+grid on;
+hold on;
+plot(times, data.r, '--k', 'DisplayName', 'reference', "LineWidth", 1);
+yline(0.2, '--r', 'DisplayName', 'x_1 max', "LineWidth", 1);
+yline(-0.2, '--r', 'DisplayName', 'x_1 min', "LineWidth", 1);
+xlabel('t [s]');
+ylabel('x_1');
+ylim([-0.25, 0.25]);
+legend();
+
+subplot(3, 1, 2);
+plot(times, data.x_msd20(2, :), 'DisplayName', 'x_2');
+grid on;
+xlabel('t [s]');
+ylabel('x_2');
+ylim([-0.40, 0.40]);
+legend();
+
+subplot(3, 1, 3);
+stairs(times, data.u20, 'DisplayName', 'u');
+grid on;
+xlabel('t [s]');
+ylabel('u');
+yline(0.25, '--r', 'DisplayName', 'u max', "LineWidth", 1);
+yline(-0.25, '--r', 'DisplayName', 'u min', "LineWidth", 1);
+ylim([-0.30, 0.30]);
+legend();
 
 %% 1.a Standard dual projected gradient Function
 function [U, lam] = myQP(H, q, A, b, lam0)
@@ -240,16 +398,16 @@ function [H, L, G, W, T, IMPC] = formQPMatrices(A, B, Q, R, P, xlim, ulim, N)
        eye(N * nu);
        -eye(N * nu)];
   W = [
-       repmat(xlim.max, N, 1);
-       repmat(-xlim.min, N, 1);
-       repmat(ulim.max, N, 1);
-       repmat(-ulim.min, N, 1);
+       repmat(xlim.max', N, 1);
+       repmat(-xlim.min', N, 1);
+       repmat(ulim.max', N, 1);
+       repmat(-ulim.min', N, 1);
        ];
   T = [
-       M;
        -M;
-       zeros(nx, N * nu);
-       zeros(nx, N * nu);
+       M;
+       zeros(N * nu, nx);
+       zeros(N * nu, nx);
        ];
   IMPC = [eye(nu, nu), zeros(nu, (N - 1) * nu)];
 
