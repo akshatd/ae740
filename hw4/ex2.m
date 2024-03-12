@@ -166,6 +166,8 @@ xlim tight;
 ylim([-0.6, 0.6]);
 legend("Location", "best", "Interpreter", "latex");
 
+snapnow;
+
 disp('1.h Simulate MPC closed loop');
 fprintf('x_1_sm limits = [%f  %f]\n', min(data.x_msd_sm(1, :)), max(data.x_msd_sm(1, :)));
 fprintf('x_1_lg limits = [%f  %f]\n', min(data.x_msd_lg(1, :)), max(data.x_msd_lg(1, :)));
@@ -185,8 +187,8 @@ fprintf('u_lg limits = [%f  %f]\n', min(data.u_lg), max(data.u_lg));
 % smaller value of $\mu$ by violating the constraints more on the controller input(u). We can also
 % observe that the final referrence value which violates the limits for $x_1$ is actually reached
 % when using the smaller value of $\mu$. The controller is able to keep violating the constraints
-% on the controller input(u) and $x_1% as it balances the cost of following the reference with
-% the cost of violating the constraints on the controller input(u) and $x_1%.
+% on the controller input(u) and $x_1$ as it balances the cost of following the reference with
+% the cost of violating the constraints on the controller input(u) and $x_1$.
 
 %% 2.a function that forms matrices needed for QP with soft constraints
 function [H, L, Gs, W, T, IMPC] = ...
