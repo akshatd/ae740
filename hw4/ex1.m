@@ -16,6 +16,7 @@ format shortG;
 % $3x_1^2 + x_2^2 + 2x_1x_2 + x_1 + 6x_2 + 2$
 %
 % the 2 can be ignored from the optimization problem as it is a constant
+%
 % the resulting matrices that produce this equation are
 
 H = [6 2;
@@ -138,8 +139,8 @@ disp(P);
 %% 1.f Represent constraints
 lN = 10;
 % large number
-xlim.max = [lN, lN, lN, 0.2, 0.2]; % [dx1, dx2, e, u, x_1]
-xlim.min = -xlim.max;
+XLIM.max = [lN, lN, lN, 0.2, 0.2]; % [dx1, dx2, e, u, x_1]
+XLIM.min = -XLIM.max;
 xlim20.max = [lN, lN, lN, 0.25, 0.2]; % [dx1, dx2, e, u, x_1]
 xlim20.min = -xlim20.max;
 % Note our "control" is "control increment", actual control is the fourth state
@@ -164,7 +165,7 @@ Tsim = Tcmd * length(cmds);
 times = 0:Ts:Tsim;
 fidelity = Ts / 10;
 % form the matrices needed for QP
-[H, L, G, W, T, IMPC] = formQPMatrices(A, B, Q, R, P, xlim, ulim, N);
+[H, L, G, W, T, IMPC] = formQPMatrices(A, B, Q, R, P, XLIM, ulim, N);
 [H20, L20, G20, W20, T20, IMPC20] = formQPMatrices(A, B, Q, R, P, xlim20, ulim, N);
 lam = ones(size(G, 1), 1);
 lam20 = ones(size(G20, 1), 1);
@@ -228,10 +229,11 @@ for t = times
 end
 
 % plot the results
-figure();
+fig = figure();
+fig.Position(3:4) = [800, 600];
 sgtitle('1.h Simulate MPC closed loop');
 subplot(3, 1, 1);
-plot(times, data.x_msd(1, :), 'DisplayName', 'x_1');
+plot(times, data.x_msd(1, :), 'DisplayName', 'x_1', "LineWidth", 2);
 grid on;
 hold on;
 plot(times, data.r, '--k', 'DisplayName', 'reference', "LineWidth", 1);
@@ -239,26 +241,28 @@ yline(0.2, '--r', 'DisplayName', 'x_1 max', "LineWidth", 1);
 yline(-0.2, '--r', 'DisplayName', 'x_1 min', "LineWidth", 1);
 xlabel('t [s]');
 ylabel('x_1');
+xlim tight;
 ylim([-0.25, 0.25]);
-legend();
+legend("Location", "best");
 
 subplot(3, 1, 2);
-plot(times, data.x_msd(2, :), 'DisplayName', 'x_2');
+plot(times, data.x_msd(2, :), 'DisplayName', 'x_2', "LineWidth", 2);
 grid on;
 xlabel('t [s]');
 ylabel('x_2');
 ylim([-0.40, 0.40]);
-legend();
+legend("Location", "best");
 
 subplot(3, 1, 3);
-stairs(times, data.u, 'DisplayName', 'u');
+stairs(times, data.u, 'DisplayName', 'u', "LineWidth", 2);
 grid on;
 xlabel('t [s]');
 ylabel('u');
 yline(0.2, '--r', 'DisplayName', 'u max', "LineWidth", 1);
 yline(-0.2, '--r', 'DisplayName', 'u min', "LineWidth", 1);
+xlim tight;
 ylim([-0.30, 0.30]);
-legend();
+legend("Location", "best");
 
 disp('1.h Simulate MPC closed loop');
 fprintf('x_1 limits = [%f  %f]\n', min(data.x_msd(1, :)), max(data.x_msd(1, :)));
@@ -271,10 +275,11 @@ fprintf('u limits = [%f  %f]\n', min(data.u), max(data.u));
 
 %% 1.i Simulate MPC closed loop and comment on differernces
 
-figure();
+fig = figure();
+fig.Position(3:4) = [800, 600];
 sgtitle('1.i Simulate MPC closed loop with different mass and stiffness');
 subplot(3, 1, 1);
-plot(times, data.x_msd20(1, :), 'DisplayName', 'x_1');
+plot(times, data.x_msd20(1, :), 'DisplayName', 'x_1', "LineWidth", 2);
 grid on;
 hold on;
 plot(times, data.r, '--k', 'DisplayName', 'reference', "LineWidth", 1);
@@ -282,26 +287,29 @@ yline(0.2, '--r', 'DisplayName', 'x_1 max', "LineWidth", 1);
 yline(-0.2, '--r', 'DisplayName', 'x_1 min', "LineWidth", 1);
 xlabel('t [s]');
 ylabel('x_1');
+xlim tight;
 ylim([-0.25, 0.25]);
-legend();
+legend("Location", "best");
 
 subplot(3, 1, 2);
-plot(times, data.x_msd20(2, :), 'DisplayName', 'x_2');
+plot(times, data.x_msd20(2, :), 'DisplayName', 'x_2', "LineWidth", 2);
 grid on;
 xlabel('t [s]');
 ylabel('x_2');
+xlim tight;
 ylim([-0.40, 0.40]);
-legend();
+legend("Location", "best");
 
 subplot(3, 1, 3);
-stairs(times, data.u20, 'DisplayName', 'u');
+stairs(times, data.u20, 'DisplayName', 'u', "LineWidth", 2);
 grid on;
 xlabel('t [s]');
 ylabel('u');
 yline(0.25, '--r', 'DisplayName', 'u max', "LineWidth", 1);
 yline(-0.25, '--r', 'DisplayName', 'u min', "LineWidth", 1);
+xlim tight;
 ylim([-0.30, 0.30]);
-legend();
+legend("Location", "best");
 
 %%
 % After reducing the mass an increasing the stiffness, we can see that the
